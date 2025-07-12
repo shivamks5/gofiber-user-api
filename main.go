@@ -1,11 +1,12 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/shivamks5/gofiber-user-api/routes"
+)
 
 func main() {
 	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("welcome to user management API")
-	})
+	routes.SetupUserRoutes(app)
 	app.Listen(":3000")
 }
