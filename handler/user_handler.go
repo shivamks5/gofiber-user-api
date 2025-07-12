@@ -58,6 +58,35 @@ func UpdateUser(c *fiber.Ctx) error {
 	})
 }
 
+func PatchUpdateUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var patchedUser map[string]interface{}
+	err := c.BodyParser(&patchedUser)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid json request",
+		})
+	}
+	for i, user := range users {
+		if user.ID == id {
+			if name, ok := patchedUser["name"].(string); ok {
+				user.Name = name
+			}
+			if email, ok := patchedUser["email"].(string); ok {
+				user.Email = email
+			}
+			if age, ok := patchedUser["age"].(float64); ok {
+				user.Age = int(age)
+			}
+			users[i] = user
+			return c.JSON(user)
+		}
+	}
+	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		"error": "user not found",
+	})
+}
+
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	for i, user := range users {
