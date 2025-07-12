@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/shivamks5/gofiber-user-api/model"
@@ -22,7 +24,37 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func GetUsers(c *fiber.Ctx) error {
-	return c.JSON(users)
+	var mini, maxi int
+	var err error
+	var listOfUsers = []model.User{}
+	queries := c.Queries()
+	minValue, maxValue := queries["min"], queries["max"]
+	if minValue != "" {
+		mini, err = strconv.Atoi(minValue)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "invalid min age in query parameter",
+			})
+		}
+	}
+	if maxValue != "" {
+		maxi, err = strconv.Atoi(maxValue)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "invalid max age in query parameter",
+			})
+		}
+	}
+	for _, user := range users {
+		if minValue != "" && user.Age < mini {
+			continue
+		}
+		if maxValue != "" && user.Age > maxi {
+			continue
+		}
+		listOfUsers = append(listOfUsers, user)
+	}
+	return c.JSON(listOfUsers)
 }
 
 func GetUserByID(c *fiber.Ctx) error {
